@@ -8,9 +8,9 @@ function Home() {
   const socket = useContext(SocketContext);
   const [state, setState] = useState({
     src: {
-      message: 'testMessage',
+      message: 'callPatient',
       body: {
-        patientId: 1,
+        patientId: '123456789',
       },
     },
   });
@@ -18,6 +18,7 @@ function Home() {
     src: {},
   });
   const handleSend = () => {
+    localStorage.setItem('message', JSON.stringify(state.src));
     socket.write(JSON.stringify(state.src), () => {});
     console.log(state.src);
   };
@@ -29,31 +30,31 @@ function Home() {
     });
   }, [socket]);
 
+  useEffect(() => {
+    const message = localStorage.getItem('message');
+    console.log(message);
+    if (message) {
+      setState({ src: JSON.parse(message) });
+    }
+  }, []);
+
   return (
     <React.Fragment>
       <div
         style={{
+          flexDirection: 'column',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'flex-start',
           padding: '20px',
           height: '100vh',
         }}>
-        <DynamicReactJson
-          displayDataTypes={false}
-          onEdit={(e) => {
-            console.log(e);
-            setState({ src: e.updated_src });
+        <textarea
+          style={{ width: '100%', height: '400px' }}
+          value={JSON.stringify(state.src, null, 2)}
+          onChange={(e) => {
+            setState({ src: JSON.parse(e.target.value) });
           }}
-          onDelete={(e) => {
-            console.log(e);
-            setState({ src: e.updated_src });
-          }}
-          onAdd={(e) => {
-            console.log(e);
-            setState({ src: e.updated_src });
-          }}
-          src={state.src}
         />{' '}
         <DynamicReactJson src={received.src}></DynamicReactJson>
         <button onClick={handleSend}>send to server</button>
